@@ -1,0 +1,25 @@
+ABOUT python-kyototycoon
+----------------------
+Python client library for Kyoto Tycoon. For more information on
+Kyoto Tycoon please, refer to the official project website.
+
+  http://fallabs.com/kyototycoon/
+
+python-kyototycoon's interface follows the preferred standard
+provided by Kyoto Tycoon's original author(s).
+
+  http://fallabs.com/kyototycoon/kyototycoon.idl
+
+There is currently no documentation for this software but for
+the meantime please see kyototycoon.py for the interface.
+
+
+INSTALLATION
+----------------------
+python setup.py build
+sudo python setup.py install
+
+
+AUTHORS
+----------------------
+Toru Maesaka <dev@torum.net>
