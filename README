@@ -1,11 +1,11 @@
-ABOUT python-kyototycoon
+ABOUT
 ----------------------
 Python client library for Kyoto Tycoon. For more information on
-Kyoto Tycoon please, refer to the official project website.
+Kyoto Tycoon please refer to the official project website.
 
   http://fallabs.com/kyototycoon/
 
-python-kyototycoon's interface follows the preferred standard
+python-kyototycoon's interface follows the preferred interface
 provided by Kyoto Tycoon's original author(s).
 
   http://fallabs.com/kyototycoon/kyototycoon.idl

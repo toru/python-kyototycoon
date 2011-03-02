@@ -13,18 +13,21 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         self.kt_handle = KyotoTycoon()
         self.kt_handle.open()
+        self.LARGE_KEY = 8000
 
     def test_set(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('key', 'value'))
         self.assertTrue(self.kt_handle.set('k e y', 'v a l u e'))
+        self.assertTrue(self.kt_handle.set('k\te\ty', 'tabbed'))
 
         self.assertEqual(self.kt_handle.get('key'), 'value')
         self.assertEqual(self.kt_handle.get('k e y'), 'v a l u e')
+        self.assertEqual(self.kt_handle.get('k\te\ty'), 'tabbed')
 
         self.assertTrue(self.kt_handle.set('\\key', '\\xxx'))
         self.assertEqual(self.kt_handle.get('\\key'), '\\xxx')
-        self.assertEqual(self.kt_handle.count(), 3)
+        self.assertEqual(self.kt_handle.count(), 4)
 
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
@@ -55,6 +58,29 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.add('lois', 'griffin'))
         self.assertTrue(self.kt_handle.add('seth', 'green'))
         self.assertTrue(self.kt_handle.add('nyc', 'new york city'))
+
+    def test_large_key(self):
+        large_key = 'x' * self.LARGE_KEY 
+        self.assertTrue(self.kt_handle.set(large_key, 'value'))
+        self.assertEqual(self.kt_handle.get(large_key), 'value')
+
+    def test_status(self):
+        self.assertTrue(self.kt_handle.clear())
+        status = None
+        status = self.kt_handle.status()
+        assert status is not None
+
+        self.assertTrue(status['count'], 0)
+        self.kt_handle.set('red', 'apple')
+        self.kt_handle.set('yellow', 'banana')
+        self.kt_handle.set('pink', 'peach')
+        self.assertTrue(status['count'], 3)
+
+    def test_error(self):
+        self.assertTrue(self.kt_handle.clear())
+        kt_error = self.kt_handle.error()
+        assert kt_error is not None
+        self.assertEqual(kt_error.code(), kt_error.SUCCESS)
 
 if __name__ == '__main__':
     unittest.main()

@@ -8,10 +8,14 @@
 import httplib
 import urllib
 import time
+import kt_error
 
 class ProtocolHandler:
     def __init__(self):
-        pass
+        self.error_obj = kt_error.KyotoTycoonError()
+
+    def error(self):
+        return self.error_obj
 
     def open(self, host, port, timeout):
         try:

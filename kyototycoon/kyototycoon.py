@@ -18,6 +18,9 @@ class KyotoTycoon:
     def __init__(self, binary=False):
         self.core = kt_http.ProtocolHandler()
 
+    def error(self):
+        return self.core.error()
+
     def open(self, host=KT_DEFAULT_HOST, port=KT_DEFAULT_PORT,
              timeout=KT_DEFAULT_TIMEOUT):
         return self.core.open(host, port, timeout)
