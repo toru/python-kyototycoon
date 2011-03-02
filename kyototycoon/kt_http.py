@@ -10,6 +10,12 @@ import urllib
 import time
 import kt_error
 
+# Stick with URL encoding for now. Eventually run a benchmark
+# to evaluate what the most approariate encoding algorithm is.
+KT_HTTP_HEADER = {
+  'Content-Type' : 'text/tab-separated-values; colenc=U',
+}
+
 class ProtocolHandler:
     def __init__(self):
         self.error_obj = kt_error.KyotoTycoonError()
@@ -89,7 +95,20 @@ class ProtocolHandler:
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
         body = rv.read()
-        return rv.status == 201;
+        return rv.status == 201
+
+    def append(self, key, value, expire):
+        key = key.encode('UTF-8')
+        key = urllib.quote(key)
+        value = urllib.quote(value)
+        request_body = 'key\t%s\nvalue\t%s\n' % (key, value)
+
+        self.conn.request('POST', '/rpc/append', body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        rv = self.conn.getresponse()
+        body = rv.read()
+        return rv.status == 200
 
     def status(self):
         self.conn.request('GET', '/rpc/status')

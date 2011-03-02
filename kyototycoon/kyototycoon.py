@@ -49,6 +49,9 @@ class KyotoTycoon:
     def replace(self, key, value, expire=None):
         return self.core.replace(key, value, expire)
 
+    def append(self, key, value, expire=None):
+        return self.core.append(key, value, expire)
+
     def remove(self, key):
         return self.core.remove(key)
 

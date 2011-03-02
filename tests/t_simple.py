@@ -29,6 +29,9 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.get('\\key'), '\\xxx')
         self.assertEqual(self.kt_handle.count(), 4)
 
+        self.assertTrue(self.kt_handle.set('tabbed\tkey', 'tabbled\tvalue'))
+        self.assertTrue(self.kt_handle.get('tabbed\tkey'))
+
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertFalse(self.kt_handle.remove('must fail key'))
@@ -45,6 +48,19 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('apple', 'ringo'))
         self.assertTrue(self.kt_handle.replace('apple', 'apfel'))
         self.assertEqual(self.kt_handle.get('apple'), 'apfel')
+
+    def test_append(self):
+        self.assertTrue(self.kt_handle.clear())
+
+        # Nothing to Append to. So, create a new record.
+        self.assertTrue(self.kt_handle.append('key', 'tail'))
+        self.assertEqual(self.kt_handle.get('key'), 'tail')
+
+        # Test append on existing record.
+        self.assertTrue(self.kt_handle.set('key', 'abc'))
+        self.assertTrue(self.kt_handle.append('key', 'def'))
+        self.assertTrue(self.kt_handle.append('key', 'ghi'))
+        self.assertEqual(self.kt_handle.get('key'), 'abcdefghi')
 
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
