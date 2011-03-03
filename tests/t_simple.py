@@ -32,11 +32,15 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('tabbed\tkey', 'tabbled\tvalue'))
         self.assertTrue(self.kt_handle.get('tabbed\tkey'))
 
+        self.assertFalse(self.kt_handle.set(None, 'value'))
+        self.assertFalse(self.kt_handle.get(None))
+
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertFalse(self.kt_handle.remove('must fail key'))
         self.assertTrue(self.kt_handle.set('deleteable key', 'xxx'))
         self.assertTrue(self.kt_handle.remove('deleteable key'))
+        self.assertFalse(self.kt_handle.remove(None))
 
     def test_replace(self):
         self.assertTrue(self.kt_handle.clear())
@@ -48,6 +52,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('apple', 'ringo'))
         self.assertTrue(self.kt_handle.replace('apple', 'apfel'))
         self.assertEqual(self.kt_handle.get('apple'), 'apfel')
+        self.assertFalse(self.kt_handle.replace(None, 'value'))
 
     def test_append(self):
         self.assertTrue(self.kt_handle.clear())
@@ -61,6 +66,7 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.append('key', 'def'))
         self.assertTrue(self.kt_handle.append('key', 'ghi'))
         self.assertEqual(self.kt_handle.get('key'), 'abcdefghi')
+        self.assertFalse(self.kt_handle.append(None, 'value'))
 
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
@@ -74,11 +80,17 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.add('lois', 'griffin'))
         self.assertTrue(self.kt_handle.add('seth', 'green'))
         self.assertTrue(self.kt_handle.add('nyc', 'new york city'))
+        self.assertFalse(self.kt_handle.add(None, 'value'))
 
     def test_large_key(self):
         large_key = 'x' * self.LARGE_KEY 
         self.assertTrue(self.kt_handle.set(large_key, 'value'))
         self.assertEqual(self.kt_handle.get(large_key), 'value')
+
+    def test_report(self):
+        report = None
+        report = self.kt_handle.report()
+        assert report is not None
 
     def test_status(self):
         self.assertTrue(self.kt_handle.clear())

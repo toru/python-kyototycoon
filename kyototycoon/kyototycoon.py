@@ -28,6 +28,9 @@ class KyotoTycoon:
     def close(self):
         return self.core.close()
 
+    def report(self):
+        return self.core.report()
+
     def status(self):
         return self.core.status()
 

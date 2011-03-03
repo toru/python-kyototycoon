@@ -37,7 +37,14 @@ class ProtocolHandler:
             raise e
         return True
 
+    def echo(self):
+        self.conn.request('POST', '/rpc/echo')
+        res = self.conn.getresponse()
+        body = res.read()
+        return True if res.status == 200 else False
+
     def get(self, key):
+        if key is None: return False
         key = key.encode('UTF-8')
         key = urllib.quote(key)
         self.conn.request('GET', key)
@@ -46,8 +53,9 @@ class ProtocolHandler:
         return body if rv.status == 200 else None
 
     def set(self, key, value, expire):
-        headers = {}
+        if key is None: return False
 
+        headers = {}
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
@@ -60,9 +68,9 @@ class ProtocolHandler:
         return rv.status == 201;
 
     def add(self, key, value, expire):
-        headers = {}
-        headers['X-Kt-Mode'] = 'add'
+        if key is None: return False
 
+        headers = { 'X-Kt-Mode' : 'add' }
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
@@ -75,6 +83,7 @@ class ProtocolHandler:
         return rv.status == 201;
 
     def remove(self, key):
+        if key is None: return False
         key.encode('UTF-8')
         key = urllib.quote(key)
         self.conn.request('DELETE', key)
@@ -83,9 +92,9 @@ class ProtocolHandler:
         return rv.status == 204
 
     def replace(self, key, value, expire):
-        headers = {}
-        headers['X-Kt-Mode'] = 'replace'
+        if key is None: return False
 
+        headers = { 'X-Kt-Mode' : 'replace' }
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
@@ -98,6 +107,8 @@ class ProtocolHandler:
         return rv.status == 201
 
     def append(self, key, value, expire):
+        if key is None: return False
+
         key = key.encode('UTF-8')
         key = urllib.quote(key)
         value = urllib.quote(value)
@@ -110,12 +121,20 @@ class ProtocolHandler:
         body = rv.read()
         return rv.status == 200
 
+    def report(self):
+        self.conn.request('GET', '/rpc/report')
+        res = self.conn.getresponse()
+        body = res.read()
+        if res.status != 200:
+            return None
+        return self._tsv_to_dict(body)
+        
     def status(self):
         self.conn.request('GET', '/rpc/status')
         res = self.conn.getresponse()
         body = res.read()
         if res.status != 200:
-            return -1
+            return None
         return self._tsv_to_dict(body)
 
     def clear(self):

@@ -15,10 +15,10 @@ class KyotoTycoonError:
     EMISK    = 15
 
     def __init__(self):
-        self.errno = self.SUCCESS
+        self.error_code = self.SUCCESS
 
     def code(self):
-        return self.errno
+        return self.error_code
 
     def name(self):
         pass
