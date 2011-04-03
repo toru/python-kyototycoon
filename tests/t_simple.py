@@ -13,7 +13,7 @@ class UnitTest(unittest.TestCase):
     def setUp(self):
         self.kt_handle = KyotoTycoon()
         self.kt_handle.open()
-        self.LARGE_KEY = 8000
+        self.LARGE_KEY_LEN = 8000
 
     def test_set(self):
         self.assertTrue(self.kt_handle.clear())
@@ -83,7 +83,7 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(self.kt_handle.add(None, 'value'))
 
     def test_large_key(self):
-        large_key = 'x' * self.LARGE_KEY 
+        large_key = 'x' * self.LARGE_KEY_LEN
         self.assertTrue(self.kt_handle.set(large_key, 'value'))
         self.assertEqual(self.kt_handle.get(large_key), 'value')
 
