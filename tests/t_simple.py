@@ -35,6 +35,12 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(self.kt_handle.set(None, 'value'))
         self.assertFalse(self.kt_handle.get(None))
 
+        self.assertTrue(self.kt_handle.set('cb', 1791))
+        self.assertEqual(self.kt_handle.get('cb'), '1791')
+
+        self.assertTrue(self.kt_handle.set('cb', 1791.1226))
+        self.assertEqual(self.kt_handle.get('cb'), '1791.1226')
+
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertFalse(self.kt_handle.remove('must fail key'))
@@ -54,6 +60,11 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.get('apple'), 'apfel')
         self.assertFalse(self.kt_handle.replace(None, 'value'))
 
+        self.assertTrue(self.kt_handle.replace('apple', 212))
+        self.assertEqual(self.kt_handle.get('apple'), '212')
+        self.assertTrue(self.kt_handle.replace('apple', 121))
+        self.assertEqual(self.kt_handle.get('apple'), '121')
+
     def test_append(self):
         self.assertTrue(self.kt_handle.clear())
 
@@ -67,6 +78,9 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.append('key', 'ghi'))
         self.assertEqual(self.kt_handle.get('key'), 'abcdefghi')
         self.assertFalse(self.kt_handle.append(None, 'value'))
+
+        self.assertTrue(self.kt_handle.append('key', 123))
+        self.assertEqual(self.kt_handle.get('key'), 'abcdefghi123')
 
     def test_increment(self):
         self.assertTrue(self.kt_handle.clear())
@@ -96,6 +110,9 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.add('seth', 'green'))
         self.assertTrue(self.kt_handle.add('nyc', 'new york city'))
         self.assertFalse(self.kt_handle.add(None, 'value'))
+
+        self.assertTrue(self.kt_handle.add('number', 111))
+        self.assertEqual(self.kt_handle.get('number'), '111')
 
     def test_large_key(self):
         large_key = 'x' * self.LARGE_KEY_LEN

@@ -45,8 +45,7 @@ class ProtocolHandler:
 
     def get(self, key):
         if key is None: return False
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
+        key = urllib.quote(key.encode('UTF-8'))
         self.conn.request('GET', key)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -60,8 +59,12 @@ class ProtocolHandler:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
 
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
+        if not isinstance(value, str):
+            value = str(value)
+
+        key = urllib.quote(key.encode('UTF-8'))
+        value = value.encode('UTF-8')
+
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -74,9 +77,13 @@ class ProtocolHandler:
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
+
+        if not isinstance(value, str):
+            value = str(value)
         
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
+        key = urllib.quote(key.encode('UTF-8'))
+        value = value.encode('UTF-8')
+
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -84,8 +91,8 @@ class ProtocolHandler:
 
     def remove(self, key):
         if key is None: return False
-        key.encode('UTF-8')
-        key = urllib.quote(key)
+
+        key = urllib.quote(key.encode('UTF-8'))
         self.conn.request('DELETE', key)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -98,9 +105,13 @@ class ProtocolHandler:
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
+
+        if not isinstance(value, str):
+            value = str(value)
         
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
+        key = urllib.quote(key.encode('UTF-8'))
+        value = value.encode('UTF-8')
+
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -109,11 +120,13 @@ class ProtocolHandler:
     def append(self, key, value, expire):
         if key is None: return False
 
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
-        value = urllib.quote(value)
-        request_body = 'key\t%s\nvalue\t%s\n' % (key, value)
+        if not isinstance(value, str):
+            value = str(value)
 
+        key = urllib.quote(key.encode('UTF-8'))
+        value = urllib.quote(value)
+
+        request_body = 'key\t%s\nvalue\t%s\n' % (key, value)
         self.conn.request('POST', '/rpc/append', body=request_body,
                           headers=KT_HTTP_HEADER)
 
@@ -124,8 +137,7 @@ class ProtocolHandler:
     def increment(self, key, delta, expire):
         if key is None: return False
 
-        key = key.encode('UTF-8')
-        key = urllib.quote(key)
+        key = urllib.quote(key.encode('UTF-8'))
         delta = int(delta)
 
         request_body = 'key\t%s\nnum\t%d\n' % (key, delta)
