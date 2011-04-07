@@ -121,6 +121,25 @@ class ProtocolHandler:
         body = rv.read()
         return rv.status == 200
 
+    def increment(self, key, delta, expire):
+        if key is None: return False
+
+        key = key.encode('UTF-8')
+        key = urllib.quote(key)
+        delta = int(delta)
+
+        request_body = 'key\t%s\nnum\t%d\n' % (key, delta)
+        self.conn.request('POST', '/rpc/increment', body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return None
+
+        return int(self._tsv_to_dict(body)['num'])
+
     def report(self):
         self.conn.request('GET', '/rpc/report')
         res = self.conn.getresponse()

@@ -55,6 +55,9 @@ class KyotoTycoon:
     def append(self, key, value, expire=None):
         return self.core.append(key, value, expire)
 
+    def increment(self, key, delta, expire=None):
+        return self.core.increment(key, delta, expire)
+
     def remove(self, key):
         return self.core.remove(key)
 

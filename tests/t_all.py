@@ -25,4 +25,3 @@ def _run_all_tests():
 
 if __name__ == '__main__':
     unittest.main(defaultTest='_run_all_tests')
-    pass

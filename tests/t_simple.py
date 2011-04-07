@@ -68,6 +68,21 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.get('key'), 'abcdefghi')
         self.assertFalse(self.kt_handle.append(None, 'value'))
 
+    def test_increment(self):
+        self.assertTrue(self.kt_handle.clear())
+
+        key = 'incrkey'
+        self.assertEqual(self.kt_handle.increment(key, 10), 10)
+        self.assertEqual(self.kt_handle.increment(key, 10), 20)
+        self.assertEqual(self.kt_handle.increment(key, 10), 30)
+        self.assertEqual(self.kt_handle.increment(key, 10), 40)
+        self.assertEqual(self.kt_handle.increment(key, 10), 50)
+
+        # Incrementing against a non numeric value. Must fail.
+        self.assertTrue(self.kt_handle.set(key, 'foo'))
+        self.assertEqual(self.kt_handle.increment(key, 10), None)
+        self.assertEqual(self.kt_handle.increment(key, 10), None)
+
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('stewie', 'griffin'))
