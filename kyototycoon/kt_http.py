@@ -182,6 +182,9 @@ class ProtocolHandler:
         dict = self.status()
         return int(dict['size'])
 
+    def _dict_to_tsv(self, dict):
+        return '\n'.join(k + '\t' + str(v) for (k, v) in dict.items())
+
     def _tsv_to_dict(self, tsv_str):
         rv = {}
         for row in tsv_str.split('\n'):
