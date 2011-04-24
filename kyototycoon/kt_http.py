@@ -10,6 +10,11 @@ import urllib
 import time
 import kt_error
 
+try:
+    import cpickle as pickle
+except ImportError:
+    import pickle
+
 # Stick with URL encoding for now. Eventually run a benchmark
 # to evaluate what the most approariate encoding algorithm is.
 KT_HTTP_HEADER = {
@@ -17,8 +22,9 @@ KT_HTTP_HEADER = {
 }
 
 class ProtocolHandler:
-    def __init__(self):
+    def __init__(self, pickle_protocol=2):
         self.error_obj = kt_error.KyotoTycoonError()
+        self.pickle_protocol = pickle_protocol
 
     def error(self):
         return self.error_obj

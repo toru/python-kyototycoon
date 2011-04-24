@@ -6,8 +6,8 @@
 # the BSD license. See COPYING file for license description.
 #
 # USAGE:
-#   $ python t_simple.py
-#   $ python t_simple.py ExpireTestCase
+#   $ python t_all.py
+#   $ python t_all.py ExpireTestCase
 
 import os
 import re
