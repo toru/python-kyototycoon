@@ -11,7 +11,7 @@ import time
 import kt_error
 
 try:
-    import cpickle as pickle
+    import cPickle as pickle
 except ImportError:
     import pickle
 
@@ -198,3 +198,10 @@ class ProtocolHandler:
             if len(kv) == 2:
                 rv[kv[0]] = kv[1]
         return rv
+
+    # TODO (tmaesaka): Allow using callbacks for these.
+    def _pack_data(self, data):
+        return pickle.dumps(data, self.pickle_protocol)
+
+    def _unpack_data(self, data):
+        return pickle.loads(data)
