@@ -7,6 +7,7 @@
 
 import httplib
 import urllib
+import struct
 import time
 import kt_error
 
@@ -57,14 +58,36 @@ class ProtocolHandler:
         body = rv.read()
         return body if rv.status == 200 else None
 
-    def set(self, key, value, expire):
+    def get_int(self, key):
         if key is None: return False
+        key = urllib.quote(key.encode('UTF-8'))
+        self.conn.request('GET', key)
+        rv = self.conn.getresponse()
+        buf = rv.read()
 
+        if rv.status != 200:
+            return None
+
+        return struct.unpack('>q', buf)[0]
+
+    def set(self, key, value, expire):
+        if key is None:
+            return False
         if not isinstance(value, str):
             value = str(value)
 
         key = urllib.quote(key.encode('UTF-8'))
         value = value.encode('UTF-8')
+        return self._rest_put(key, value, expire) == 201
+
+    def set_int(self, key, value, expire):
+        if key is None:
+            return False
+        if not isinstance(value, int):
+            return False
+
+        key = urllib.quote(key.encode('UTF-8'))
+        value = struct.pack('>q', value)
         return self._rest_put(key, value, expire) == 201
 
     def add(self, key, value, expire):

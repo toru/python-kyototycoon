@@ -46,6 +46,9 @@ class KyotoTycoon:
     def set(self, key, value, expire=None):
         return self.core.set(key, value, expire)
 
+    def set_int(self, key, value, expire=None):
+        return self.core.set_int(key, value, expire)
+
     def add(self, key, value, expire=None):
         return self.core.add(key, value, expire)
 
@@ -64,8 +67,5 @@ class KyotoTycoon:
     def get(self, key):
         return self.core.get(key)
 
-    def set_int(self, key, value, expire=None):
-        pass
-
     def get_int(self, key):
-        pass
+        return self.core.get_int(key)

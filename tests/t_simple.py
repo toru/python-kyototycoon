@@ -41,6 +41,17 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('cb', 1791.1226))
         self.assertEqual(self.kt_handle.get('cb'), '1791.1226')
 
+    def test_set_int(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set_int('key', 1984))
+
+        # get() would fail due to the default serializer.
+        self.failIf(self.kt_handle.get('key') == 1984)
+        # get_int() must succeed.
+        self.assertEqual(self.kt_handle.get_int('key'), 1984)
+        # this must fail since set_int() only accepts an integer.
+        self.assertFalse(self.kt_handle.set_int('key', '1984'))
+
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertFalse(self.kt_handle.remove('must fail key'))
