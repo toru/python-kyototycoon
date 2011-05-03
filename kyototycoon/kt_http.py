@@ -60,21 +60,12 @@ class ProtocolHandler:
     def set(self, key, value, expire):
         if key is None: return False
 
-        headers = {}
-        if expire != None:
-            expire = int(time.time()) + expire;
-            headers["X-Kt-Xt"] = str(expire)
-
         if not isinstance(value, str):
             value = str(value)
 
         key = urllib.quote(key.encode('UTF-8'))
         value = value.encode('UTF-8')
-
-        self.conn.request('PUT', key, value, headers)
-        rv = self.conn.getresponse()
-        body = rv.read()
-        return rv.status == 201;
+        return self._rest_put(key, value, expire) == 201
 
     def add(self, key, value, expire):
         if key is None: return False
@@ -198,6 +189,17 @@ class ProtocolHandler:
             if len(kv) == 2:
                 rv[kv[0]] = kv[1]
         return rv
+
+    def _rest_put(self, key, value, expire):
+        headers = {}
+        if expire != None:
+            expire = int(time.time()) + expire;
+            headers["X-Kt-Xt"] = str(expire)
+
+        self.conn.request('PUT', key, value, headers)
+        rv = self.conn.getresponse()
+        body = rv.read()
+        return rv.status
 
     # TODO (tmaesaka): Allow using callbacks for these.
     def _pack_data(self, data):
