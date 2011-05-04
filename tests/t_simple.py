@@ -76,23 +76,6 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.replace('apple', 121))
         self.assertEqual(self.kt_handle.get('apple'), '121')
 
-    def test_append(self):
-        self.assertTrue(self.kt_handle.clear())
-
-        # Nothing to Append to. So, create a new record.
-        self.assertTrue(self.kt_handle.append('key', 'tail'))
-        self.assertEqual(self.kt_handle.get('key'), 'tail')
-
-        # Test append on existing record.
-        self.assertTrue(self.kt_handle.set('key', 'abc'))
-        self.assertTrue(self.kt_handle.append('key', 'def'))
-        self.assertTrue(self.kt_handle.append('key', 'ghi'))
-        self.assertEqual(self.kt_handle.get('key'), 'abcdefghi')
-        self.assertFalse(self.kt_handle.append(None, 'value'))
-
-        self.assertTrue(self.kt_handle.append('key', 123))
-        self.assertEqual(self.kt_handle.get('key'), 'abcdefghi123')
-
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('stewie', 'griffin'))

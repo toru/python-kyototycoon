@@ -19,8 +19,8 @@ class UnitTest(unittest.TestCase):
         value = 'tabs\tin\tvalue'
 
         self.assertTrue(self.kt_handle.clear())
-        self.assertTrue(self.kt_handle.append(key, value))
-        self.assertEqual(self.kt_handle.get(key), value)
+        self.assertEqual(self.kt_handle.increment(key, 1024), 1024)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -137,23 +137,6 @@ class ProtocolHandler:
         body = rv.read()
         return rv.status == 201
 
-    def append(self, key, value, expire):
-        if key is None: return False
-
-        if not isinstance(value, str):
-            value = str(value)
-
-        key = urllib.quote(key.encode('UTF-8'))
-        value = urllib.quote(value)
-
-        request_body = 'key\t%s\nvalue\t%s\n' % (key, value)
-        self.conn.request('POST', '/rpc/append', body=request_body,
-                          headers=KT_HTTP_HEADER)
-
-        rv = self.conn.getresponse()
-        body = rv.read()
-        return rv.status == 200
-
     def increment(self, key, delta, expire):
         if key is None: return False
 
@@ -224,9 +207,8 @@ class ProtocolHandler:
         body = rv.read()
         return rv.status
 
-    # TODO (tmaesaka): Allow using callbacks for these.
-    def _pack_data(self, data):
+    def _pickle_packer(self, data):
         return pickle.dumps(data, self.pickle_protocol)
 
-    def _unpack_data(self, data):
+    def _pickle_unpacker(self, data):
         return pickle.loads(data)
