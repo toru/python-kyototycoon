@@ -26,6 +26,8 @@ class ProtocolHandler:
     def __init__(self, pickle_protocol=2):
         self.error_obj = kt_error.KyotoTycoonError()
         self.pickle_protocol = pickle_protocol
+        self.pack = self._pickle_packer
+        self.unpack = self._pickle_unpacker
 
     def error(self):
         return self.error_obj
@@ -51,12 +53,18 @@ class ProtocolHandler:
         return True if res.status == 200 else False
 
     def get(self, key):
-        if key is None: return False
+        if key is None:
+            return False
+
         key = urllib.quote(key.encode('UTF-8'))
         self.conn.request('GET', key)
         rv = self.conn.getresponse()
         body = rv.read()
-        return body if rv.status == 200 else None
+
+        if rv.status != 200:
+            return None
+
+        return self.unpack(body)
 
     def get_int(self, key):
         if key is None: return False
@@ -73,11 +81,9 @@ class ProtocolHandler:
     def set(self, key, value, expire):
         if key is None:
             return False
-        if not isinstance(value, str):
-            value = str(value)
 
         key = urllib.quote(key.encode('UTF-8'))
-        value = value.encode('UTF-8')
+        value = self.pack(value)
         return self._rest_put(key, value, expire) == 201
 
     def set_int(self, key, value, expire):
@@ -91,18 +97,16 @@ class ProtocolHandler:
         return self._rest_put(key, value, expire) == 201
 
     def add(self, key, value, expire):
-        if key is None: return False
+        if key is None:
+            return False
 
         headers = { 'X-Kt-Mode' : 'add' }
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
 
-        if not isinstance(value, str):
-            value = str(value)
-        
         key = urllib.quote(key.encode('UTF-8'))
-        value = value.encode('UTF-8')
+        value = self.pack(value) 
 
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
@@ -125,12 +129,9 @@ class ProtocolHandler:
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
-
-        if not isinstance(value, str):
-            value = str(value)
         
         key = urllib.quote(key.encode('UTF-8'))
-        value = value.encode('UTF-8')
+        value = self.pack(value)
 
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()

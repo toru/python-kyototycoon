@@ -36,20 +36,15 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(self.kt_handle.get(None))
 
         self.assertTrue(self.kt_handle.set('cb', 1791))
-        self.assertEqual(self.kt_handle.get('cb'), '1791')
+        self.assertEqual(self.kt_handle.get('cb'), 1791)
 
         self.assertTrue(self.kt_handle.set('cb', 1791.1226))
-        self.assertEqual(self.kt_handle.get('cb'), '1791.1226')
+        self.assertEqual(self.kt_handle.get('cb'), 1791.1226)
 
     def test_set_int(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set_int('key', 1984))
-
-        # get() would fail due to the default serializer.
-        self.failIf(self.kt_handle.get('key') == 1984)
-        # get_int() must succeed.
         self.assertEqual(self.kt_handle.get_int('key'), 1984)
-        # this must fail since set_int() only accepts an integer.
         self.assertFalse(self.kt_handle.set_int('key', '1984'))
 
     def test_remove(self):
@@ -72,9 +67,9 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(self.kt_handle.replace(None, 'value'))
 
         self.assertTrue(self.kt_handle.replace('apple', 212))
-        self.assertEqual(self.kt_handle.get('apple'), '212')
+        self.assertEqual(self.kt_handle.get('apple'), 212)
         self.assertTrue(self.kt_handle.replace('apple', 121))
-        self.assertEqual(self.kt_handle.get('apple'), '121')
+        self.assertEqual(self.kt_handle.get('apple'), 121)
 
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
@@ -91,7 +86,7 @@ class UnitTest(unittest.TestCase):
         self.assertFalse(self.kt_handle.add(None, 'value'))
 
         self.assertTrue(self.kt_handle.add('number', 111))
-        self.assertEqual(self.kt_handle.get('number'), '111')
+        self.assertEqual(self.kt_handle.get('number'), 111)
 
     def test_large_key(self):
         large_key = 'x' * self.LARGE_KEY_LEN
