@@ -71,6 +71,18 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.replace('apple', 121))
         self.assertEqual(self.kt_handle.get('apple'), 121)
 
+    def test_append(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set('k1', 'abc'))
+        self.assertTrue(self.kt_handle.append('k1', 'def'))
+        self.assertEqual(self.kt_handle.get('k1'), 'abcdef')
+
+        self.assertTrue(self.kt_handle.append('k2', 'new val'))
+        self.assertEqual(self.kt_handle.get('k2'), 'new val')
+
+        self.assertTrue(self.kt_handle.set('k3', 777))
+        self.assertFalse(self.kt_handle.append('k3', 111))
+
     def test_add(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('stewie', 'griffin'))

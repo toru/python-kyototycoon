@@ -22,12 +22,18 @@ KT_HTTP_HEADER = {
   'Content-Type' : 'text/tab-separated-values; colenc=U',
 }
 
+KT_PACKER_CUSTOM = 0
+KT_PACKER_PICKLE = 1
+KT_PACKER_JSON   = 2
+KT_PACKER_STRING = 3
+
 class ProtocolHandler:
     def __init__(self, pickle_protocol=2):
         self.error_obj = kt_error.KyotoTycoonError()
         self.pickle_protocol = pickle_protocol
         self.pack = self._pickle_packer
         self.unpack = self._pickle_unpacker
+        self.pack_type = KT_PACKER_PICKLE
 
     def error(self):
         return self.error_obj
@@ -106,7 +112,7 @@ class ProtocolHandler:
             headers["X-Kt-Xt"] = str(expire)
 
         key = urllib.quote(key.encode('UTF-8'))
-        value = self.pack(value) 
+        value = self.pack(value)
 
         self.conn.request('PUT', key, value, headers)
         rv = self.conn.getresponse()
@@ -129,7 +135,7 @@ class ProtocolHandler:
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
-        
+
         key = urllib.quote(key.encode('UTF-8'))
         value = self.pack(value)
 
@@ -137,6 +143,23 @@ class ProtocolHandler:
         rv = self.conn.getresponse()
         body = rv.read()
         return rv.status == 201
+
+    def append(self, key, value, expire):
+        if key is None:
+            return False
+        elif not isinstance(value, str):
+            return False
+
+        # Only handle Pickle for now.
+        if self.pack_type == KT_PACKER_PICKLE:
+            data = self.get(key)
+            if data is None:
+                data = value
+            else:
+                data = data + value
+            return self.set(key, data, expire)
+
+        return False
 
     def increment(self, key, delta, expire):
         if key is None: return False
@@ -163,7 +186,7 @@ class ProtocolHandler:
         if res.status != 200:
             return None
         return self._tsv_to_dict(body)
-        
+
     def status(self):
         self.conn.request('GET', '/rpc/status')
         res = self.conn.getresponse()
