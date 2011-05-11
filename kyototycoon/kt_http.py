@@ -84,6 +84,12 @@ class ProtocolHandler:
 
         return struct.unpack('>q', buf)[0]
 
+    def vacuum(self):
+        self.conn.request('GET', '/rpc/vacuum')
+        res = self.conn.getresponse()
+        body = res.read()
+        return res.status == 200
+
     def set(self, key, value, expire):
         if key is None:
             return False

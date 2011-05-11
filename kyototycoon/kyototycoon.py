@@ -69,3 +69,6 @@ class KyotoTycoon:
 
     def get_int(self, key):
         return self.core.get_int(key)
+
+    def vacuum(self):
+        return self.core.vacuum()

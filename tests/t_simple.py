@@ -54,6 +54,9 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.remove('deleteable key'))
         self.assertFalse(self.kt_handle.remove(None))
 
+    def test_vacuum(self):
+        self.assertTrue(self.kt_handle.vacuum())
+
     def test_replace(self):
         self.assertTrue(self.kt_handle.clear())
 
