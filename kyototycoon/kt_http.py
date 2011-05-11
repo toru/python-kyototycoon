@@ -193,26 +193,38 @@ class ProtocolHandler:
             return None
         return self._tsv_to_dict(body)
 
-    def status(self):
-        self.conn.request('GET', '/rpc/status')
+    def status(self, db=None):
+        url = '/rpc/status'
+
+        if db:
+            db = urllib.quote(db)
+            url += '?DB=' + db
+
+        self.conn.request('GET', url)
         res = self.conn.getresponse()
         body = res.read()
         if res.status != 200:
             return None
         return self._tsv_to_dict(body)
 
-    def clear(self):
-        self.conn.request('GET', '/rpc/clear')
+    def clear(self, db=None):
+        url = '/rpc/clear'
+
+        if db:
+            db = urllib.quote(db)
+            url += '?DB=' + db
+
+        self.conn.request('GET', url)
         res = self.conn.getresponse()
         body = res.read()
         return True if res.status == 200 else False
 
-    def count(self):
-        dict = self.status()
+    def count(self, db=None):
+        dict = self.status(db)
         return int(dict['count'])
 
-    def size(self):
-        dict = self.status()
+    def size(self, db=None):
+        dict = self.status(db)
         return int(dict['size'])
 
     def _dict_to_tsv(self, dict):

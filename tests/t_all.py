@@ -23,9 +23,9 @@ def _run_all_tests():
     for filename in os.listdir(test_path):
         match = _TEST_MODULE_PATTERN.search(filename)
         if match:
-            # Only run expiration test when specified
-            if match.group(1) != 't_expire':
-                module_names.append(match.group(1))
+            case = match.group(1)
+            if case != 't_expire' and case != 't_multi':
+                module_names.append(case)
 
     return loader.loadTestsFromNames(module_names)
 

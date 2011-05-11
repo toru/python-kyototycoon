@@ -38,6 +38,5 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.increment(key, 20), 180)
         self.assertEqual(self.kt_handle.increment(key, 20), 200)
 
-
 if __name__ == '__main__':
     unittest.main()

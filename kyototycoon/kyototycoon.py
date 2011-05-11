@@ -31,17 +31,17 @@ class KyotoTycoon:
     def report(self):
         return self.core.report()
 
-    def status(self):
-        return self.core.status()
+    def status(self, db=None):
+        return self.core.status(db)
 
-    def clear(self):
-        return self.core.clear()
+    def clear(self, db=None):
+        return self.core.clear(db)
 
-    def count(self):
-        return self.core.count()
+    def count(self, db=None):
+        return self.core.count(db)
 
-    def size(self):
-        return self.core.size()
+    def size(self, db=None):
+        return self.core.size(db)
 
     def set(self, key, value, expire=None):
         return self.core.set(key, value, expire)
