@@ -58,12 +58,16 @@ class ProtocolHandler:
         body = res.read()
         return True if res.status == 200 else False
 
-    def get(self, key):
+    def get(self, key, db=None):
         if key is None:
             return False
 
-        key = urllib.quote(key.encode('UTF-8'))
-        self.conn.request('GET', key)
+        path = key
+        if db:
+            path = '/%s/%s' % (db, key)
+        path = urllib.quote(path.encode('UTF-8'))
+
+        self.conn.request('GET', path)
         rv = self.conn.getresponse()
         body = rv.read()
 
@@ -90,13 +94,16 @@ class ProtocolHandler:
         body = res.read()
         return res.status == 200
 
-    def set(self, key, value, expire):
+    def set(self, key, value, expire, db=None):
         if key is None:
             return False
 
-        key = urllib.quote(key.encode('UTF-8'))
+        path = key
+        if db:
+            path = '/%s/%s' % (db, key)
+        path = urllib.quote(path.encode('UTF-8'))
         value = self.pack(value)
-        return self._rest_put(key, value, expire) == 201
+        return self._rest_put(path, value, expire) == 201
 
     def set_int(self, key, value, expire):
         if key is None:
