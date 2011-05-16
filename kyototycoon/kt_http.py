@@ -76,10 +76,16 @@ class ProtocolHandler:
 
         return self.unpack(body)
 
-    def get_int(self, key):
-        if key is None: return False
-        key = urllib.quote(key.encode('UTF-8'))
-        self.conn.request('GET', key)
+    def get_int(self, key, db=None):
+        if key is None:
+            return False
+
+        path = key
+        if db:
+            path = '/%s/%s' % (db, key)
+        path = urllib.quote(path.encode('UTF-8'))
+
+        self.conn.request('GET', path)
         rv = self.conn.getresponse()
         buf = rv.read()
 
@@ -105,15 +111,18 @@ class ProtocolHandler:
         value = self.pack(value)
         return self._rest_put(path, value, expire) == 201
 
-    def set_int(self, key, value, expire):
+    def set_int(self, key, value, expire, db=None):
         if key is None:
             return False
         if not isinstance(value, int):
             return False
 
-        key = urllib.quote(key.encode('UTF-8'))
+        path = key
+        if db:
+            path = '/%s/%s' % (db, key)
+        path = urllib.quote(path.encode('UTF-8'))
         value = struct.pack('>q', value)
-        return self._rest_put(key, value, expire) == 201
+        return self._rest_put(path, value, expire) == 201
 
     def add(self, key, value, expire):
         if key is None:
