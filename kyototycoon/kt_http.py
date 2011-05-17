@@ -106,6 +106,40 @@ class ProtocolHandler:
         body = res.read()
         return res.status == 200
 
+    def match_prefix(self, prefix, max, db):
+        if prefix is None:
+            return False
+
+        rv = []
+        request_dict = {}
+        request_dict['prefix'] = prefix
+
+        if max:
+            request_dict['max'] = max
+        if db:
+            request_dict['DB'] = db
+
+        request_body = self._dict_to_tsv(request_dict)
+        self.conn.request('POST', '/rpc/match_prefix',
+                          body=request_body, headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return False
+
+        res_dict = self._tsv_to_dict(body)
+        n = res_dict.pop('num')
+
+        if n == 0:
+            return None
+
+        for k in res_dict.keys():
+            rv.append(k[1:])
+
+        return rv
+
     def set(self, key, value, expire, db=None):
         if key is None:
             return False

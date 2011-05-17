@@ -131,5 +131,21 @@ class UnitTest(unittest.TestCase):
     def test_vacuum(self):
         self.assertTrue(self.kt_handle.vacuum())
 
+    def test_match_prefix(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set('abc', 'val'))
+        self.assertTrue(self.kt_handle.set('abcd', 'val'))
+        self.assertTrue(self.kt_handle.set('abcde', 'val'))
+        self.assertTrue(self.kt_handle.set('abcdef', 'val'))
+        self.assertTrue(self.kt_handle.set('abcdefg', 'val'))
+        self.assertTrue(self.kt_handle.set('abcdefgh', 'val'))
+
+        list = self.kt_handle.match_prefix('abc')
+        self.assertEqual(len(list), 6)
+        list = self.kt_handle.match_prefix('abcd')
+        self.assertEqual(len(list), 5)
+        list = self.kt_handle.match_prefix('abc', 1)
+        self.assertEqual(list[0], 'abc')
+
 if __name__ == '__main__':
     unittest.main()

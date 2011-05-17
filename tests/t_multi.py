@@ -145,5 +145,21 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.get_int('key', db=DB_1), 200)
         self.assertEqual(self.kt_handle.get_int('key', db=DB_2), 400)
 
+    def test_match_prefix(self):
+        self.assertTrue(self.clear_all())
+        self.assertTrue(self.kt_handle.set('abcdef', 'val', db=DB_1))
+        self.assertTrue(self.kt_handle.set('fedcba', 'val', db=DB_2))
+
+        list = self.kt_handle.match_prefix('abc', db=DB_1)
+        self.assertEqual(len(list), 1)
+        self.assertEqual(list[0], 'abcdef')
+        list = self.kt_handle.match_prefix('abc', db=DB_2)
+        self.assertEqual(len(list), 0)
+        list = self.kt_handle.match_prefix('fed', db=DB_1)
+        self.assertEqual(len(list), 0)
+        list = self.kt_handle.match_prefix('fed', db=DB_2)
+        self.assertEqual(len(list), 1)
+        self.assertEqual(list[0], 'fedcba')
+
 if __name__ == '__main__':
     unittest.main()

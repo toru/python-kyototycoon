@@ -72,3 +72,6 @@ class KyotoTycoon:
 
     def vacuum(self, db=None):
         return self.core.vacuum(db)
+
+    def match_prefix(self, prefix, max=None, db=None):
+        return self.core.match_prefix(prefix, max, db)
