@@ -84,5 +84,66 @@ class UnitTest(unittest.TestCase):
         assert self.kt_handle.get('key2', db=DB_INVALID) is None
         assert self.kt_handle.get('key1', db=DB_2) is None
 
+    def test_add(self):
+        self.assertTrue(self.clear_all())
+
+        # Should not conflict due to different databases.
+        self.assertTrue(self.kt_handle.add('key1', 'val1', db=DB_1))
+        self.assertTrue(self.kt_handle.add('key1', 'val1', db=DB_2))
+
+        # Now they should.
+        self.assertFalse(self.kt_handle.add('key1', 'val1', db=DB_1))
+        self.assertFalse(self.kt_handle.add('key1', 'val1', db=DB_2))
+        self.assertFalse(self.kt_handle.add('key1', 'val1', db=DB_INVALID))
+
+    def test_replace(self):
+        self.assertTrue(self.clear_all())
+        self.assertTrue(self.kt_handle.add('key1', 'val1', db=DB_1))
+        self.assertFalse(self.kt_handle.replace('key1', 'val2', db=DB_2))
+        self.assertTrue(self.kt_handle.replace('key1', 'val2', db=DB_1))
+        self.assertFalse(self.kt_handle.replace('key1', 'val2', db=DB_INVALID))
+
+        self.assertTrue(self.kt_handle.add('key2', 'aaa'))
+        self.assertTrue(self.kt_handle.replace('key2', 'bbb'))
+        self.assertTrue(self.kt_handle.replace('key1', 'zzz'))
+        self.assertEqual(self.kt_handle.get('key2'), 'bbb')
+        self.assertEqual(self.kt_handle.get('key1'), 'zzz')
+
+    def test_remove(self):
+        self.assertTrue(self.clear_all())
+        self.assertTrue(self.kt_handle.add('key', 'value', db=DB_1))
+        self.assertTrue(self.kt_handle.add('key', 'value', db=DB_2))
+
+        self.assertTrue(self.kt_handle.remove('key', db=DB_1))
+        self.assertEqual(self.kt_handle.get('key', db=DB_2), 'value')
+        assert self.kt_handle.get('key', db=DB_1) is None
+
+    def test_vacuum(self):
+        self.assertTrue(self.kt_handle.vacuum())
+        self.assertTrue(self.kt_handle.vacuum(db=DB_1))
+        self.assertTrue(self.kt_handle.vacuum(db=DB_2))
+        self.assertFalse(self.kt_handle.vacuum(db=DB_INVALID))
+
+    def test_append(self):
+        self.assertTrue(self.clear_all())
+        self.assertTrue(self.kt_handle.set('key', 'xxx', db=DB_1))
+        self.assertTrue(self.kt_handle.set('key', 'xxx', db=DB_2))
+        self.assertTrue(self.kt_handle.append('key', 'xxx', db=DB_1))
+
+        self.assertEqual(self.kt_handle.get('key', db=DB_1), 'xxxxxx')
+        self.assertEqual(self.kt_handle.get('key', db=DB_2), 'xxx')
+
+    def test_increment(self):
+        self.assertTrue(self.clear_all())
+        self.assertEqual(self.kt_handle.increment('key', 0, db=DB_1), 0)
+        self.assertEqual(self.kt_handle.increment('key', 0, db=DB_2), 0)
+
+        self.assertEqual(self.kt_handle.increment('key', 100, db=DB_1), 100)
+        self.assertEqual(self.kt_handle.increment('key', 200, db=DB_2), 200)
+        self.assertEqual(self.kt_handle.increment('key', 100, db=DB_1), 200)
+        self.assertEqual(self.kt_handle.increment('key', 200, db=DB_2), 400)
+        self.assertEqual(self.kt_handle.get_int('key', db=DB_1), 200)
+        self.assertEqual(self.kt_handle.get_int('key', db=DB_2), 400)
+
 if __name__ == '__main__':
     unittest.main()

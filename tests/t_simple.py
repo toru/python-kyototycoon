@@ -128,5 +128,8 @@ class UnitTest(unittest.TestCase):
         assert kt_error is not None
         self.assertEqual(kt_error.code(), kt_error.SUCCESS)
 
+    def test_vacuum(self):
+        self.assertTrue(self.kt_handle.vacuum())
+
 if __name__ == '__main__':
     unittest.main()
