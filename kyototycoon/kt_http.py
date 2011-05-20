@@ -76,6 +76,47 @@ class ProtocolHandler:
 
         return self.unpack(body)
 
+    def get_bulk(self, keys, atomic, db):
+        if not isinstance(keys, list):
+            return None
+
+        if len(keys) < 1:
+            return {} 
+
+        path = '/rpc/get_bulk'
+        if db:
+            db = urllib.quote(db)
+            path += '?DB=' + db
+
+        request_body = ''
+
+        if atomic:
+            request_body = 'atomic\t\n'
+
+        for key in keys:
+            request_body += '_' + key + '\t\n'
+
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return None
+
+        rv = {}
+        res_dict = self._tsv_to_dict(body)
+        n = res_dict.pop('num')
+
+        if n == 0:
+            return None
+
+        for k, v in res_dict.items():
+            if v is not None:
+                rv[k[1:]] = self.unpack(urllib.unquote(v))
+        return rv
+
     def get_int(self, key, db=None):
         if key is None:
             return False

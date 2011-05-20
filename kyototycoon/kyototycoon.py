@@ -73,6 +73,9 @@ class KyotoTycoon:
     def get_int(self, key, db=None):
         return self.core.get_int(key, db)
 
+    def get_bulk(self, keys, atomic=True, db=None):
+        return self.core.get_bulk(keys, atomic, db)
+
     def vacuum(self, db=None):
         return self.core.vacuum(db)
 

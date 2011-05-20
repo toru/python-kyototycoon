@@ -84,6 +84,32 @@ class UnitTest(unittest.TestCase):
         assert self.kt_handle.get('key2', db=DB_INVALID) is None
         assert self.kt_handle.get('key1', db=DB_2) is None
 
+    def test_get_multi(self):
+        self.assertTrue(self.clear_all())
+
+        self.assertTrue(self.kt_handle.set('a', 'xxxx', db=DB_1))
+        self.assertTrue(self.kt_handle.set('b', 'yyyy', db=DB_1))
+        self.assertTrue(self.kt_handle.set('c', 'zzzz', db=DB_1))
+        self.assertTrue(self.kt_handle.set('a1', 'xxxx', db=DB_2))
+        self.assertTrue(self.kt_handle.set('b1', 'yyyy', db=DB_2))
+        self.assertTrue(self.kt_handle.set('c1', 'zzzz', db=DB_2))
+
+        d = self.kt_handle.get_bulk(['a', 'b', 'c'], db=DB_1)
+        self.assertEqual(len(d), 3)
+        self.assertEqual(d['a'], 'xxxx')
+        self.assertEqual(d['b'], 'yyyy')
+        self.assertEqual(d['c'], 'zzzz')
+        d = self.kt_handle.get_bulk(['a', 'b', 'c'], db=DB_2)
+        self.assertEqual(len(d), 0)
+
+        d = self.kt_handle.get_bulk(['a1', 'b1', 'c1'], db=DB_2)
+        self.assertEqual(len(d), 3)
+        self.assertEqual(d['a1'], 'xxxx')
+        self.assertEqual(d['b1'], 'yyyy')
+        self.assertEqual(d['c1'], 'zzzz')
+        d = self.kt_handle.get_bulk(['a1', 'b1', 'c1'], db=DB_1)
+        self.assertEqual(len(d), 0)
+
     def test_add(self):
         self.assertTrue(self.clear_all())
 

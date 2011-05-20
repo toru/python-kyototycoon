@@ -100,6 +100,29 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.add('number', 111))
         self.assertEqual(self.kt_handle.get('number'), 111)
 
+    def test_get_bulk(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set('a', 'one'))
+        self.assertTrue(self.kt_handle.set('b', 'two'))
+        self.assertTrue(self.kt_handle.set('c', 'three'))
+        self.assertTrue(self.kt_handle.set('d', 'four'))
+
+        d = self.kt_handle.get_bulk(['a','b','c','d'])
+        assert d is not None
+
+        self.assertEqual(d['a'], 'one')
+        self.assertEqual(d['b'], 'two')
+        self.assertEqual(d['c'], 'three')
+        self.assertEqual(d['d'], 'four')
+        self.assertEqual(len(d), 4)
+
+        d = self.kt_handle.get_bulk(['a','x','y','d'])
+        self.assertEqual(len(d), 2)
+        d = self.kt_handle.get_bulk(['w','x','y','z'])
+        self.assertEqual(len(d), 0)
+        d = self.kt_handle.get_bulk([])
+        self.assertEqual(d, {})
+
     def test_large_key(self):
         large_key = 'x' * self.LARGE_KEY_LEN
         self.assertTrue(self.kt_handle.set(large_key, 'value'))
