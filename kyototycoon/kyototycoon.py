@@ -61,6 +61,9 @@ class KyotoTycoon:
     def increment(self, key, delta, expire=None, db=None):
         return self.core.increment(key, delta, expire, db)
 
+    def increment_double(self, key, delta, expire=None, db=None):
+        return self.core.increment_double(key, delta, expire, db)
+
     def remove(self, key, db=None):
         return self.core.remove(key, db)
 

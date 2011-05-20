@@ -38,5 +38,13 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.increment(key, 20), 180)
         self.assertEqual(self.kt_handle.increment(key, 20), 200)
 
+    def test_increment_double(self):
+        self.assertTrue(self.kt_handle.clear())
+
+        key = 'incrkey'
+        self.assertEqual(self.kt_handle.increment_double(key, 1.23), 1.23)
+        self.assertEqual(self.kt_handle.increment_double(key, 1.11), 2.34)
+        self.assertEqual(self.kt_handle.increment_double(key, 0.16), 2.50)
+
 if __name__ == '__main__':
     unittest.main()

@@ -256,6 +256,27 @@ class ProtocolHandler:
 
         return int(self._tsv_to_dict(body)['num'])
 
+    def increment_double(self, key, delta, expire, db):
+        if key is None:
+            return False
+
+        path = '/rpc/increment_double'
+        if db:
+            path += '?DB=' + db
+
+        delta = float(delta)
+        request_body = 'key\t%s\nnum\t%f\n' % (key, delta)
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return None
+
+        return float(self._tsv_to_dict(body)['num'])
+
     def report(self):
         self.conn.request('GET', '/rpc/report')
         res = self.conn.getresponse()
