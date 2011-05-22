@@ -70,6 +70,9 @@ class KyotoTycoon:
     def get_int(self, key, db=None):
         return self.core.get_int(key, db)
 
+    def set_bulk(self, kv_dict, expire=None, atomic=True, db=None):
+        return self.core.set_bulk(kv_dict, expire, atomic, db)
+
     def get_bulk(self, keys, atomic=True, db=None):
         return self.core.get_bulk(keys, atomic, db)
 

@@ -76,6 +76,38 @@ class ProtocolHandler:
 
         return self.unpack(body)
 
+    def set_bulk(self, kv_dict, expire, atomic, db):
+        if not isinstance(kv_dict, dict):
+            return False 
+        if len(kv_dict) < 1:
+            return False
+
+        path = '/rpc/set_bulk'
+        if db:
+            db = urllib.quote(db)
+            path += '?DB=' + db
+
+        request_body = ''
+
+        if atomic:
+            request_body = 'atomic\t\n'
+
+        for k, v in kv_dict.items():
+            k = urllib.quote(k)
+            v = urllib.quote(self.pack(v))
+            request_body += '_' + k + '\t' + v + '\n'
+
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return False 
+
+        return int(self._tsv_to_dict(body)['num'])
+
     def get_bulk(self, keys, atomic, db):
         if not isinstance(keys, list):
             return None
@@ -94,7 +126,7 @@ class ProtocolHandler:
             request_body = 'atomic\t\n'
 
         for key in keys:
-            request_body += '_' + key + '\t\n'
+            request_body += '_' + urllib.quote(key) + '\t\n'
 
         self.conn.request('POST', path, body=request_body,
                           headers=KT_HTTP_HEADER)
@@ -114,7 +146,7 @@ class ProtocolHandler:
 
         for k, v in res_dict.items():
             if v is not None:
-                rv[k[1:]] = self.unpack(urllib.unquote(v))
+                rv[urllib.unquote(k[1:])] = self.unpack(urllib.unquote(v))
         return rv
 
     def get_int(self, key, db=None):

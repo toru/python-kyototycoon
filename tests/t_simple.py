@@ -94,6 +94,35 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.add('number', 111))
         self.assertEqual(self.kt_handle.get('number'), 111)
 
+    def test_set_bulk(self):
+        self.assertTrue(self.kt_handle.clear())
+
+        dict = {
+            'k1': 'one',
+            'k2': 'two',
+            'k3': 'three',
+            'k4': 'four',
+            'k\n5': 'five',
+            'k\t6': 'six',
+            'k7': 111
+        }
+
+        n = self.kt_handle.set_bulk(dict)
+        self.assertEqual(len(dict), n)
+        self.assertEqual(self.kt_handle.get('k1'), 'one')
+        self.assertEqual(self.kt_handle.get('k2'), 'two')
+        self.assertEqual(self.kt_handle.get('k3'), 'three')
+        self.assertEqual(self.kt_handle.get('k4'), 'four')
+        self.assertEqual(self.kt_handle.get('k\n5'), 'five')
+        self.assertEqual(self.kt_handle.get('k\t6'), 'six')
+        self.assertEqual(self.kt_handle.get('k7'), 111)
+
+        d = self.kt_handle.get_bulk(['k1', 'k2', 'k3', 'k4',
+                                     'k\n5', 'k\t6', 'k7'])
+
+        self.assertEqual(len(d), len(dict))
+        self.assertEqual(d, dict)
+
     def test_get_bulk(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('a', 'one'))
