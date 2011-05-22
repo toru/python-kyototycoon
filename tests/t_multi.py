@@ -66,24 +66,6 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.count(db=DB_1), 0)
         self.assertEqual(self.kt_handle.count(db=DB_2), 1)
 
-    def test_set_get_int(self):
-        self.assertTrue(self.clear_all())
-        self.assertTrue(self.kt_handle.set_int('key1', 1, db=DB_1))
-        self.assertTrue(self.kt_handle.set_int('key2', 2, db=DB_2))
-        self.assertFalse(self.kt_handle.set_int('key3', 3, db=DB_INVALID))
-
-        self.assertEqual(self.kt_handle.get_int('key1'), 1)
-        self.assertEqual(self.kt_handle.get_int('key1', db=0), 1)
-        self.assertEqual(self.kt_handle.get_int('key1', db=DB_1), 1)
-        assert self.kt_handle.get('key1', db=DB_2) is None
-        assert self.kt_handle.get('key1', db=DB_INVALID) is None
-
-        self.assertEqual(self.kt_handle.get_int('key2', db=DB_2), 2)
-        self.assertEqual(self.kt_handle.get_int('key2', db=1), 2)
-        assert self.kt_handle.get('key2', db=DB_1) is None
-        assert self.kt_handle.get('key2', db=DB_INVALID) is None
-        assert self.kt_handle.get('key1', db=DB_2) is None
-
     def test_get_multi(self):
         self.assertTrue(self.clear_all())
 

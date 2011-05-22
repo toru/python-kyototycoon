@@ -30,14 +30,6 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.increment(key, 10), None)
         self.assertEqual(self.kt_handle.increment(key, 10), None)
 
-        # Increment against a value written with set_int()
-        self.assertTrue(self.kt_handle.set_int(key, 100))
-        self.assertEqual(self.kt_handle.increment(key, 20), 120)
-        self.assertEqual(self.kt_handle.increment(key, 20), 140)
-        self.assertEqual(self.kt_handle.increment(key, 20), 160)
-        self.assertEqual(self.kt_handle.increment(key, 20), 180)
-        self.assertEqual(self.kt_handle.increment(key, 20), 200)
-
     def test_increment_double(self):
         self.assertTrue(self.kt_handle.clear())
 

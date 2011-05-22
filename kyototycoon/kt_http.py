@@ -185,56 +185,31 @@ class ProtocolHandler:
         if key is None:
             return False
 
-        path = key
         if db:
-            path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
+            key = '/%s/%s' % (db, key)
+        key = urllib.quote(key.encode('UTF-8'))
         value = self.pack(value)
-        return self._rest_put(path, value, expire) == 201
-
-    def set_int(self, key, value, expire, db=None):
-        if key is None:
-            return False
-        if not isinstance(value, int):
-            return False
-
-        path = key
-        if db:
-            path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
-        value = struct.pack('>q', value)
-        return self._rest_put(path, value, expire) == 201
+        return self._rest_put('set', key, value, expire) == 201
 
     def add(self, key, value, expire, db):
         if key is None:
             return False
 
-        headers = { 'X-Kt-Mode' : 'add' }
-        if expire != None:
-            expire = int(time.time()) + expire;
-            headers["X-Kt-Xt"] = str(expire)
-
-        path = key
         if db:
-            path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
+            key = '/%s/%s' % (db, key)
+        key = urllib.quote(key.encode('UTF-8'))
         value = self.pack(value)
-
-        self.conn.request('PUT', path, value, headers)
-        rv = self.conn.getresponse()
-        body = rv.read()
-        return rv.status == 201;
+        return self._rest_put('add', key, value, expire) == 201
 
     def remove(self, key, db):
         if key is None:
             return False
 
-        path = key
         if db:
-            path = '/%s/%s' % (db, key)
+            key = '/%s/%s' % (db, key)
 
-        path = urllib.quote(path.encode('UTF-8'))
-        self.conn.request('DELETE', path)
+        key = urllib.quote(key.encode('UTF-8'))
+        self.conn.request('DELETE', key)
         rv = self.conn.getresponse()
         body = rv.read()
         return rv.status == 204
@@ -243,21 +218,11 @@ class ProtocolHandler:
         if key is None:
             return False
 
-        headers = { 'X-Kt-Mode' : 'replace' }
-        if expire != None:
-            expire = int(time.time()) + expire;
-            headers["X-Kt-Xt"] = str(expire)
-
-        path = key
         if db:
-            path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
+            key = '/%s/%s' % (db, key)
+        key = urllib.quote(key.encode('UTF-8'))
         value = self.pack(value)
-
-        self.conn.request('PUT', path, value, headers)
-        rv = self.conn.getresponse()
-        body = rv.read()
-        return rv.status == 201
+        return self._rest_put('replace', key, value, expire) == 201
 
     def append(self, key, value, expire, db):
         if key is None:
@@ -371,8 +336,9 @@ class ProtocolHandler:
                 rv[kv[0]] = kv[1]
         return rv
 
-    def _rest_put(self, key, value, expire):
-        headers = {}
+    def _rest_put(self, operation, key, value, expire):
+        headers = { 'X-Kt-Mode' : operation }
+        print headers
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
