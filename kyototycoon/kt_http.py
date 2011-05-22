@@ -338,7 +338,6 @@ class ProtocolHandler:
 
     def _rest_put(self, operation, key, value, expire):
         headers = { 'X-Kt-Mode' : operation }
-        print headers
         if expire != None:
             expire = int(time.time()) + expire;
             headers["X-Kt-Xt"] = str(expire)
