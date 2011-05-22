@@ -79,6 +79,7 @@ class ProtocolHandler:
     def set_bulk(self, kv_dict, expire, atomic, db):
         if not isinstance(kv_dict, dict):
             return False 
+
         if len(kv_dict) < 1:
             return False
 
@@ -105,6 +106,37 @@ class ProtocolHandler:
 
         if res.status != 200:
             return False 
+
+        return int(self._tsv_to_dict(body)['num'])
+
+    def remove_bulk(self, keys, atomic, db):
+        if not isinstance(keys, list):
+            return 0
+
+        if len(keys) < 1:
+            return 0
+
+        path = '/rpc/remove_bulk'
+        if db:
+            db = urllib.quote(db)
+            path += '?DB=' + db
+
+        request_body = ''
+
+        if atomic:
+            request_body = 'atomic\t\n'
+
+        for key in keys:
+            request_body += '_' + urllib.quote(key) + '\t\n'
+
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return False
 
         return int(self._tsv_to_dict(body)['num'])
 

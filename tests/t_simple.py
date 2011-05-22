@@ -123,6 +123,12 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(len(d), len(dict))
         self.assertEqual(d, dict)
 
+        self.assertEqual(self.kt_handle.count(), 7)
+        n = self.kt_handle.remove_bulk(['k1', 'k2', 'k\t6'])
+        self.assertEqual(self.kt_handle.count(), 4)
+        n = self.kt_handle.remove_bulk(['k3'], atomic=True)
+        self.assertEqual(self.kt_handle.count(), 3)
+
     def test_get_bulk(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertTrue(self.kt_handle.set('a', 'one'))

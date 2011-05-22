@@ -73,6 +73,9 @@ class KyotoTycoon:
     def set_bulk(self, kv_dict, expire=None, atomic=True, db=None):
         return self.core.set_bulk(kv_dict, expire, atomic, db)
 
+    def remove_bulk(self, keys, atomic=True, db=None):
+        return self.core.remove_bulk(keys, atomic, db)
+
     def get_bulk(self, keys, atomic=True, db=None):
         return self.core.get_bulk(keys, atomic, db)
 
