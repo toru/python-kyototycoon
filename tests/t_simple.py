@@ -41,6 +41,20 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('cb', 1791.1226))
         self.assertEqual(self.kt_handle.get('cb'), 1791.1226)
 
+    def test_cas(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set('key', 'xxx'))
+        self.assertTrue(self.kt_handle.cas('key', old_val='xxx', new_val='yyy'))
+        self.assertEqual(self.kt_handle.get('key'), 'yyy')
+
+        self.assertTrue(self.kt_handle.cas('key', old_val='yyy'))
+        assert self.kt_handle.get('key') is None
+        self.assertTrue(self.kt_handle.cas('key', new_val='zzz'))
+        self.assertEqual(self.kt_handle.get('key'), 'zzz')
+
+        self.assertFalse(self.kt_handle.cas('key', old_val='foo', new_val='zz'))
+        self.assertEqual(self.kt_handle.get('key'), 'zzz')
+
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
         self.assertFalse(self.kt_handle.remove('must fail key'))

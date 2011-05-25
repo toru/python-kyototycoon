@@ -265,6 +265,32 @@ class ProtocolHandler:
         value = self.pack(value)
         return self._rest_put('add', key, value, expire) == 201
 
+    def cas(self, key, old_val, new_val, expire, db):
+        if key is None:
+            return False
+
+        path = '/rpc/cas'
+        if db:
+            path += '?DB=' + db
+
+        request_dict = { 'key': key }
+
+        if old_val:
+            request_dict['oval'] = urllib.quote(self.pack(old_val))
+        if new_val:
+            request_dict['nval'] = urllib.quote(self.pack(new_val))
+        if expire:
+            request_dict['xt'] = expire
+
+        request_body = self._dict_to_tsv(request_dict)
+
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+        return res.status == 200
+
     def remove(self, key, db):
         if key is None:
             return False
