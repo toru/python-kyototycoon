@@ -117,6 +117,15 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(self.kt_handle.get('key2'), 'bbb')
         self.assertEqual(self.kt_handle.get('key1'), 'zzz')
 
+    def test_cas(self):
+        self.assertTrue(self.clear_all())
+        self.assertTrue(self.kt_handle.set('key', 'xxx'))
+        self.assertFalse(self.kt_handle.cas('key', old_val='xxx',
+                                            new_val='yyy', db=DB_2))
+        self.assertTrue(self.kt_handle.cas('key', old_val='xxx',
+                                            new_val='yyy', db=DB_1))
+        self.assertTrue(self.kt_handle.cas('key', new_val='xxx', db=DB_2))
+
     def test_remove(self):
         self.assertTrue(self.clear_all())
         self.assertTrue(self.kt_handle.add('key', 'value', db=DB_1))

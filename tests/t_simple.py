@@ -213,5 +213,18 @@ class UnitTest(unittest.TestCase):
         list = self.kt_handle.match_prefix('abc', 1)
         self.assertEqual(list[0], 'abc')
 
+    def test_match_regex(self):
+        self.assertTrue(self.kt_handle.clear())
+        self.assertTrue(self.kt_handle.set('abc', 'val'))
+        self.assertTrue(self.kt_handle.set('abcd', 'val'))
+        self.assertTrue(self.kt_handle.set('abcde', 'val'))
+
+        list = self.kt_handle.match_regex('^abc')
+        self.assertEqual(len(list), 3)
+        list = self.kt_handle.match_regex('^abcd')
+        self.assertEqual(len(list), 2)
+        list = self.kt_handle.match_regex('e$')
+        self.assertEqual(len(list), 1)
+
 if __name__ == '__main__':
     unittest.main()

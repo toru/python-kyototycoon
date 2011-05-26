@@ -213,7 +213,7 @@ class ProtocolHandler:
 
     def match_prefix(self, prefix, max, db):
         if prefix is None:
-            return False
+            return None
 
         rv = []
         request_dict = {}
@@ -245,7 +245,40 @@ class ProtocolHandler:
 
         return rv
 
-    def set(self, key, value, expire, db=None):
+    def match_regex(self, regex, max, db):
+        if regex is None:
+            return None
+
+        path = '/rpc/match_regex'
+        if db:
+            path += '?DB=' + db
+
+        request_dict = { 'regex': regex }
+        if max:
+            request_dict['max'] = max
+
+        request_body = self._dict_to_tsv(request_dict)
+        self.conn.request('POST', path, body=request_body,
+                          headers=KT_HTTP_HEADER)
+
+        res = self.conn.getresponse()
+        body = res.read()
+
+        if res.status != 200:
+            return None
+
+        rv = []
+        res_dict = self._tsv_to_dict(body)
+
+        if res_dict.pop('num') < 1:
+            return []
+        
+        for k in res_dict.keys():
+            rv.append(k[1:])
+
+        return rv
+
+    def set(self, key, value, expire, db):
         if key is None:
             return False
 
