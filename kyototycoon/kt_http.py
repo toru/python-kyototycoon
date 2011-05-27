@@ -65,7 +65,7 @@ class ProtocolHandler:
         path = key
         if db:
             path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
+        path = urllib.quote(path.encode('UTF-8'), safe='')
 
         self.conn.request('GET', path)
         rv = self.conn.getresponse()
@@ -85,7 +85,7 @@ class ProtocolHandler:
 
         path = '/rpc/set_bulk'
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             path += '?DB=' + db
 
         request_body = ''
@@ -94,8 +94,8 @@ class ProtocolHandler:
             request_body = 'atomic\t\n'
 
         for k, v in kv_dict.items():
-            k = urllib.quote(k)
-            v = urllib.quote(self.pack(v))
+            k = urllib.quote(k, safe='')
+            v = urllib.quote(self.pack(v), safe='')
             request_body += '_' + k + '\t' + v + '\n'
 
         self.conn.request('POST', path, body=request_body,
@@ -118,7 +118,7 @@ class ProtocolHandler:
 
         path = '/rpc/remove_bulk'
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             path += '?DB=' + db
 
         request_body = ''
@@ -127,7 +127,7 @@ class ProtocolHandler:
             request_body = 'atomic\t\n'
 
         for key in keys:
-            request_body += '_' + urllib.quote(key) + '\t\n'
+            request_body += '_' + urllib.quote(key, safe='') + '\t\n'
 
         self.conn.request('POST', path, body=request_body,
                           headers=KT_HTTP_HEADER)
@@ -149,7 +149,7 @@ class ProtocolHandler:
 
         path = '/rpc/get_bulk'
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             path += '?DB=' + db
 
         request_body = ''
@@ -158,7 +158,7 @@ class ProtocolHandler:
             request_body = 'atomic\t\n'
 
         for key in keys:
-            request_body += '_' + urllib.quote(key) + '\t\n'
+            request_body += '_' + urllib.quote(key, safe='') + '\t\n'
 
         self.conn.request('POST', path, body=request_body,
                           headers=KT_HTTP_HEADER)
@@ -188,7 +188,7 @@ class ProtocolHandler:
         path = key
         if db:
             path = '/%s/%s' % (db, key)
-        path = urllib.quote(path.encode('UTF-8'))
+        path = urllib.quote(path.encode('UTF-8'), safe='')
 
         self.conn.request('GET', path)
         rv = self.conn.getresponse()
@@ -203,7 +203,7 @@ class ProtocolHandler:
         path = '/rpc/vacuum'
 
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             path += '?DB=' + db
 
         self.conn.request('GET', path)
@@ -284,7 +284,7 @@ class ProtocolHandler:
 
         if db:
             key = '/%s/%s' % (db, key)
-        key = urllib.quote(key.encode('UTF-8'))
+        key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
         return self._rest_put('set', key, value, expire) == 201
 
@@ -294,7 +294,7 @@ class ProtocolHandler:
 
         if db:
             key = '/%s/%s' % (db, key)
-        key = urllib.quote(key.encode('UTF-8'))
+        key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
         return self._rest_put('add', key, value, expire) == 201
 
@@ -309,9 +309,9 @@ class ProtocolHandler:
         request_dict = { 'key': key }
 
         if old_val:
-            request_dict['oval'] = urllib.quote(self.pack(old_val))
+            request_dict['oval'] = urllib.quote(self.pack(old_val), safe='')
         if new_val:
-            request_dict['nval'] = urllib.quote(self.pack(new_val))
+            request_dict['nval'] = urllib.quote(self.pack(new_val), safe='')
         if expire:
             request_dict['xt'] = expire
 
@@ -331,7 +331,7 @@ class ProtocolHandler:
         if db:
             key = '/%s/%s' % (db, key)
 
-        key = urllib.quote(key.encode('UTF-8'))
+        key = urllib.quote(key.encode('UTF-8'), safe='')
         self.conn.request('DELETE', key)
         rv = self.conn.getresponse()
         body = rv.read()
@@ -343,7 +343,7 @@ class ProtocolHandler:
 
         if db:
             key = '/%s/%s' % (db, key)
-        key = urllib.quote(key.encode('UTF-8'))
+        key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
         return self._rest_put('replace', key, value, expire) == 201
 
@@ -418,7 +418,7 @@ class ProtocolHandler:
         url = '/rpc/status'
 
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             url += '?DB=' + db
 
         self.conn.request('GET', url)
@@ -432,7 +432,7 @@ class ProtocolHandler:
         url = '/rpc/clear'
 
         if db:
-            db = urllib.quote(db)
+            db = urllib.quote(db, safe='')
             url += '?DB=' + db
 
         self.conn.request('GET', url)

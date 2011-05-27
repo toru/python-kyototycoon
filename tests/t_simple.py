@@ -32,6 +32,14 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('tabbed\tkey', 'tabbled\tvalue'))
         self.assertTrue(self.kt_handle.get('tabbed\tkey'))
 
+        self.assertTrue(self.kt_handle.set('url1', 'http://github.com'))
+        self.assertTrue(self.kt_handle.set('url2', 'https://github.com/'))
+        self.assertTrue(self.kt_handle.set('url3', 'https://github.com/blog/'))
+
+        self.assertTrue(self.kt_handle.set('http://github.com', 'url1'))
+        self.assertTrue(self.kt_handle.set('https://github.com', 'url2'))
+        self.assertTrue(self.kt_handle.set('https://github.com/blog/', 'url3'))
+
         self.assertFalse(self.kt_handle.set(None, 'value'))
         self.assertFalse(self.kt_handle.get(None))
 
