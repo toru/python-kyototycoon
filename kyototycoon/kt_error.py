@@ -12,6 +12,7 @@ class KyotoTycoonError:
     LOGIC    = 3
     INTERNAL = 4
     NETWORK  = 5
+    NOTFOUND = 6
     EMISC    = 255
 
     ErrorNameDict = {
@@ -21,6 +22,7 @@ class KyotoTycoonError:
         LOGIC: "LOGIC",
         INTERNAL: "INTERNAL",
         NETWORK: "NETWORK",
+        NOTFOUND: "NOTFOUND",
         EMISC: "EMISC",
     }
 
@@ -31,13 +33,22 @@ class KyotoTycoonError:
         LOGIC: "Logic Error",
         INTERNAL: "Internal Error",
         NETWORK: "Network Error",
+        NOTFOUND: "Record Not Found",
         EMISC: "Miscellenious Error",
     }
 
     def __init__(self):
+        self.set_success()
+
+    def set_success(self):
         self.error_code = self.SUCCESS
         self.error_name = self.ErrorNameDict[self.SUCCESS]
         self.error_message = self.ErrorMessageDict[self.SUCCESS]
+
+    def set_error(self, code):
+        self.error_code = code
+        self.error_name = self.ErrorNameDict[code]
+        self.error_message = self.ErrorMessageDict[code]
 
     def code(self):
         return self.error_code

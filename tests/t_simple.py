@@ -17,7 +17,11 @@ class UnitTest(unittest.TestCase):
 
     def test_set(self):
         self.assertTrue(self.kt_handle.clear())
+        error = self.kt_handle.error()
+
         self.assertTrue(self.kt_handle.set('key', 'value'))
+        self.assertEqual(error.code(), error.SUCCESS)
+
         self.assertTrue(self.kt_handle.set('k e y', 'v a l u e'))
         self.assertTrue(self.kt_handle.set('k\te\ty', 'tabbed'))
 
@@ -41,51 +45,84 @@ class UnitTest(unittest.TestCase):
         self.assertTrue(self.kt_handle.set('https://github.com/blog/', 'url3'))
 
         self.assertFalse(self.kt_handle.set(None, 'value'))
+        self.assertEqual(error.code(), error.LOGIC)
+
         self.assertFalse(self.kt_handle.get(None))
+        self.assertEqual(error.code(), error.LOGIC)
+
+        self.assertEqual(self.kt_handle.get('non_existent'), None)
+        self.assertEqual(error.code(), error.NOTFOUND)
 
         self.assertTrue(self.kt_handle.set('cb', 1791))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertEqual(self.kt_handle.get('cb'), 1791)
+        self.assertEqual(error.code(), error.SUCCESS)
 
         self.assertTrue(self.kt_handle.set('cb', 1791.1226))
         self.assertEqual(self.kt_handle.get('cb'), 1791.1226)
 
     def test_cas(self):
         self.assertTrue(self.kt_handle.clear())
+        error = self.kt_handle.error()
+
         self.assertTrue(self.kt_handle.set('key', 'xxx'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertTrue(self.kt_handle.cas('key', old_val='xxx', new_val='yyy'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertEqual(self.kt_handle.get('key'), 'yyy')
+        self.assertEqual(error.code(), error.SUCCESS)
 
         self.assertTrue(self.kt_handle.cas('key', old_val='yyy'))
         assert self.kt_handle.get('key') is None
+        self.assertEqual(error.code(), error.NOTFOUND)
         self.assertTrue(self.kt_handle.cas('key', new_val='zzz'))
         self.assertEqual(self.kt_handle.get('key'), 'zzz')
+        self.assertEqual(error.code(), error.SUCCESS)
 
         self.assertFalse(self.kt_handle.cas('key', old_val='foo', new_val='zz'))
+        self.assertEqual(error.code(), error.EMISC)
         self.assertEqual(self.kt_handle.get('key'), 'zzz')
+        self.assertEqual(error.code(), error.SUCCESS)
 
     def test_remove(self):
         self.assertTrue(self.kt_handle.clear())
+        error = self.kt_handle.error()
+
         self.assertFalse(self.kt_handle.remove('must fail key'))
+        self.assertEqual(error.code(), error.NOTFOUND)
         self.assertTrue(self.kt_handle.set('deleteable key', 'xxx'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertTrue(self.kt_handle.remove('deleteable key'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertFalse(self.kt_handle.remove(None))
+        self.assertEqual(error.code(), error.LOGIC)
 
     def test_replace(self):
         self.assertTrue(self.kt_handle.clear())
+        error = self.kt_handle.error()
 
         # Must Fail - Can't replace something that doesn't exist.
         self.assertFalse(self.kt_handle.replace('xxxxxx', 'some value'))
+        self.assertEqual(error.code(), error.NOTFOUND)
 
         # Popuate then Replace.
         self.assertTrue(self.kt_handle.set('apple', 'ringo'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertTrue(self.kt_handle.replace('apple', 'apfel'))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertEqual(self.kt_handle.get('apple'), 'apfel')
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertFalse(self.kt_handle.replace(None, 'value'))
+        self.assertEqual(error.code(), error.LOGIC)
 
         self.assertTrue(self.kt_handle.replace('apple', 212))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertEqual(self.kt_handle.get('apple'), 212)
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertTrue(self.kt_handle.replace('apple', 121))
+        self.assertEqual(error.code(), error.SUCCESS)
         self.assertEqual(self.kt_handle.get('apple'), 121)
+        self.assertEqual(error.code(), error.SUCCESS)
 
     def test_append(self):
         self.assertTrue(self.kt_handle.clear())

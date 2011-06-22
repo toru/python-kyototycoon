@@ -29,14 +29,14 @@ KT_PACKER_STRING = 3
 
 class ProtocolHandler:
     def __init__(self, pickle_protocol=2):
-        self.error_obj = kt_error.KyotoTycoonError()
+        self.err = kt_error.KyotoTycoonError()
         self.pickle_protocol = pickle_protocol
         self.pack = self._pickle_packer
         self.unpack = self._pickle_unpacker
         self.pack_type = KT_PACKER_PICKLE
 
     def error(self):
-        return self.error_obj
+        return self.err
 
     def open(self, host, port, timeout):
         try:
@@ -56,7 +56,13 @@ class ProtocolHandler:
         self.conn.request('POST', '/rpc/echo')
         res = self.conn.getresponse()
         body = res.read()
-        return True if res.status == 200 else False
+
+        if res.status != 200:
+           self.err.set_error(err.EMISC)
+           return False
+
+        self.err.set_success()
+        return True
 
     def get(self, key, db=None):
         if key is None:
@@ -71,16 +77,19 @@ class ProtocolHandler:
         rv = self.conn.getresponse()
         body = rv.read()
 
-        if rv.status != 200:
+        if rv.status == 404:
+            self.err.set_error(self.err.NOTFOUND)
             return None
 
+        self.err.set_success()
         return self.unpack(body)
 
     def set_bulk(self, kv_dict, expire, atomic, db):
         if not isinstance(kv_dict, dict):
-            return False 
+            return False
 
         if len(kv_dict) < 1:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         path = '/rpc/set_bulk'
@@ -105,15 +114,19 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
-            return False 
+            self.err.set_error(self.err.EMISC)
+            return False
 
+        self.err.set_success()
         return int(self._tsv_to_dict(body)['num'])
 
     def remove_bulk(self, keys, atomic, db):
         if not isinstance(keys, list):
+            self.err.set_error(self.err.LOGIC)
             return 0
 
         if len(keys) < 1:
+            self.err.set_error(self.err.LOGIC)
             return 0
 
         path = '/rpc/remove_bulk'
@@ -136,16 +149,20 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return False
 
+        self.err.set_success()
         return int(self._tsv_to_dict(body)['num'])
 
     def get_bulk(self, keys, atomic, db):
         if not isinstance(keys, list):
+            self.err.set_error(self.err.LOGIC)
             return None
 
         if len(keys) < 1:
-            return {} 
+            self.err.set_error(self.err.LOGIC)
+            return {}
 
         path = '/rpc/get_bulk'
         if db:
@@ -167,6 +184,7 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
 
         rv = {}
@@ -174,15 +192,19 @@ class ProtocolHandler:
         n = res_dict.pop('num')
 
         if n == 0:
+            self.err.set_error(self.err.NOTFOUND)
             return None
 
         for k, v in res_dict.items():
             if v is not None:
                 rv[urllib.unquote(k[1:])] = self.unpack(urllib.unquote(v))
+
+        self.err.set_success()
         return rv
 
     def get_int(self, key, db=None):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         path = key
@@ -195,8 +217,10 @@ class ProtocolHandler:
         buf = rv.read()
 
         if rv.status != 200:
+            self.err.set_error(self.err.NOTFOUND)
             return None
 
+        self.err.set_success()
         return struct.unpack('>q', buf)[0]
 
     def vacuum(self, db):
@@ -209,10 +233,16 @@ class ProtocolHandler:
         self.conn.request('GET', path)
         res = self.conn.getresponse()
         body = res.read()
+
+        if res.status != 200:
+            self.err.set_error(self.err.EMISC)
+
+        self.err.set_success()
         return res.status == 200
 
     def match_prefix(self, prefix, max, db):
         if prefix is None:
+            self.err.set_error(self.err.LOGIC)
             return None
 
         rv = []
@@ -232,21 +262,25 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return False
 
         res_dict = self._tsv_to_dict(body)
         n = res_dict.pop('num')
 
         if n == 0:
+            self.err.set_error(self.err.NOTFOUND)
             return None
 
         for k in res_dict.keys():
             rv.append(k[1:])
 
+        self.err.set_success()
         return rv
 
     def match_regex(self, regex, max, db):
         if regex is None:
+            self.err.set_error(self.err.LOGIC)
             return None
 
         path = '/rpc/match_regex'
@@ -265,41 +299,65 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
 
         rv = []
         res_dict = self._tsv_to_dict(body)
 
         if res_dict.pop('num') < 1:
+            self.err.set_error(self.err.NOTFOUND)
             return []
-        
+
         for k in res_dict.keys():
             rv.append(k[1:])
 
+        self.err.set_success()
         return rv
 
     def set(self, key, value, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         if db:
             key = '/%s/%s' % (db, key)
         key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
-        return self._rest_put('set', key, value, expire) == 201
+
+        self.err.set_success()
+
+        status = self._rest_put('set', key, value, expire)
+
+        if status != 201:
+            self.err.set_error(self.err.EMISC)
+            return False
+
+        self.err.set_success()
+        return True
 
     def add(self, key, value, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         if db:
             key = '/%s/%s' % (db, key)
+
         key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
-        return self._rest_put('add', key, value, expire) == 201
+        status = self._rest_put('add', key, value, expire)
+
+        if status != 201:
+            self.err.set_error(self.err.EMISC)
+            return False
+
+        self.err.set_success()
+        return True
 
     def cas(self, key, old_val, new_val, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         path = '/rpc/cas'
@@ -322,10 +380,17 @@ class ProtocolHandler:
 
         res = self.conn.getresponse()
         body = res.read()
-        return res.status == 200
+
+        if res.status != 200:
+            self.err.set_error(self.err.EMISC)
+            return False
+
+        self.err.set_success()
+        return True
 
     def remove(self, key, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         if db:
@@ -335,19 +400,35 @@ class ProtocolHandler:
         self.conn.request('DELETE', key)
         rv = self.conn.getresponse()
         body = rv.read()
-        return rv.status == 204
+
+        if rv.status != 204:
+            self.err.set_error(self.err.NOTFOUND)
+            return False
+
+        self.err.set_success()
+        return True
 
     def replace(self, key, value, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         if db:
             key = '/%s/%s' % (db, key)
+
         key = urllib.quote(key.encode('UTF-8'), safe='')
         value = self.pack(value)
-        return self._rest_put('replace', key, value, expire) == 201
+        status = self._rest_put('replace', key, value, expire)
+
+        if status != 201:
+            self.err.set_error(self.err.NOTFOUND)
+            return False
+
+        self.err.set_success()
+        return True
 
     def append(self, key, value, expire, db):
+        self.err.set_error(self.err.LOGIC)
         if key is None:
             return False
         elif not isinstance(value, str):
@@ -360,12 +441,17 @@ class ProtocolHandler:
                 data = value
             else:
                 data = data + value
-            return self.set(key, data, expire, db)
 
+            if self.set(key, data, expire, db) is True:
+                self.err.set_success()
+                return True
+
+        self.err.set_error(self.err.EMISC)
         return False
 
     def increment(self, key, delta, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         path = '/rpc/increment'
@@ -381,12 +467,15 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
 
+        self.err.set_success()
         return int(self._tsv_to_dict(body)['num'])
 
     def increment_double(self, key, delta, expire, db):
         if key is None:
+            self.err.set_error(self.err.LOGIC)
             return False
 
         path = '/rpc/increment_double'
@@ -402,16 +491,22 @@ class ProtocolHandler:
         body = res.read()
 
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
 
+        self.err.set_success()
         return float(self._tsv_to_dict(body)['num'])
 
     def report(self):
         self.conn.request('GET', '/rpc/report')
         res = self.conn.getresponse()
         body = res.read()
+
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
+
+        self.err.set_success()
         return self._tsv_to_dict(body)
 
     def status(self, db=None):
@@ -424,8 +519,12 @@ class ProtocolHandler:
         self.conn.request('GET', url)
         res = self.conn.getresponse()
         body = res.read()
+
         if res.status != 200:
+            self.err.set_error(self.err.EMISC)
             return None
+
+        self.err.set_success()
         return self._tsv_to_dict(body)
 
     def clear(self, db=None):
@@ -438,15 +537,25 @@ class ProtocolHandler:
         self.conn.request('GET', url)
         res = self.conn.getresponse()
         body = res.read()
-        return True if res.status == 200 else False
+
+        if res.status != 200:
+            self.err.set_error(self.err.EMISC)
+            return False
+
+        self.err.set_success()
+        return True
 
     def count(self, db=None):
-        dict = self.status(db)
-        return int(dict['count'])
+        st = self.status(db)
+        if st is None:
+            return None
+        return int(st['count'])
 
     def size(self, db=None):
-        dict = self.status(db)
-        return int(dict['size'])
+        st = self.status(db)
+        if st is None:
+            return None
+        return int(st['size'])
 
     def _dict_to_tsv(self, dict):
         return '\n'.join(k + '\t' + str(v) for (k, v) in dict.items())
