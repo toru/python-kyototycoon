@@ -10,6 +10,7 @@ import urllib
 import struct
 import time
 import kt_error
+import base64
 
 try:
     import cPickle as pickle
@@ -155,6 +156,7 @@ class ProtocolHandler:
         self.err.set_success()
         return int(self._tsv_to_dict(body)['num'])
 
+
     def get_bulk(self, keys, atomic, db):
         if not isinstance(keys, list):
             self.err.set_error(self.err.LOGIC)
@@ -181,6 +183,11 @@ class ProtocolHandler:
                           headers=KT_HTTP_HEADER)
 
         res = self.conn.getresponse()
+        content_type = None
+        for header in res.getheaders():
+            if header[0] == 'content-type':
+                content_type = header[1]
+
         body = res.read()
 
         if res.status != 200:
@@ -189,18 +196,31 @@ class ProtocolHandler:
 
         rv = {}
         res_dict = self._tsv_to_dict(body)
-        n = res_dict.pop('num')
+        actual_dict = {}
+        for k,v in res_dict.items():
+            if content_type == 'text/tab-separated-values; colenc=B':
+                actual_dict[base64.decodestring(k)] = base64.decodestring(v)
+            elif content_type == 'text/tab-separated-values; colenc=U':
+                actual_dict[urllib.unquote(k)] = urllib.unquote(v)
+            else:
+                actual_dict[k] = v
+
+        n = actual_dict.pop('num')
 
         if n == 0:
             self.err.set_error(self.err.NOTFOUND)
             return None
-
-        for k, v in res_dict.items():
+        
+        for k, v in actual_dict.items():
             if v is not None:
-                rv[urllib.unquote(k[1:])] = self.unpack(urllib.unquote(v))
-
+                try:
+                    rv[k[1:]] = self.unpack(v)
+                except: 
+                    rv[k[1:]] = None
+                    
         self.err.set_success()
         return rv
+
 
     def get_int(self, key, db=None):
         if key is None:
